@@ -1,17 +1,7 @@
-import { Application, Assets, Container, Sprite, Loader } from 'pixi.js';
+import { Application, AnimatedSprite, Assets, Container, Sprite, Loader } from 'pixi.js';
 import sources from './source';
-function onDragMove(event) {
-    let currentTarget = event.currentTarget;
-    let newPosition = event.data.global; // 获取拖动到的位置
-    // 划分范围
-    if (newPosition.x > 0) {
-        currentTarget.x = newPosition.x - currentTarget.width * 0.5;
-    }
-    if (newPosition.y > 0) {
-        currentTarget.y = newPosition.y - currentTarget.height * 0.5;
-    }
-}
-
+import TWEEN from 'tween.js';
+let obstacleTime = 6000;
 export default class PlaneGame {
     constructor(options) {
         this.width = options.width || 500
@@ -21,6 +11,7 @@ export default class PlaneGame {
         this.Loader = new Loader()
         this.sourceMap = new Map()
         this.bullets = []
+        this.obstacles = []
         this.scene = new Container({
             width: this.width, height: this.height,
         })
@@ -41,6 +32,9 @@ export default class PlaneGame {
             const texture = await Assets.load(sources[key]);
             this.sourceMap.set(key, texture)
         }
+
+
+
         this.loadBg()
         this.loadPlane()
     }
@@ -77,32 +71,136 @@ export default class PlaneGame {
         const createBullets = () => {
             const bullet = new Sprite(this.sourceMap.get('bullet'))
             container.addChild(bullet)
+            bullet.scale = 0.5;
             bullet.y = plane.y
-            bullet.x = plane.x + (plane.width * 0.5) - (bullet.width * 0.5);
+            bullet.x = plane.x + plane.width / 2 - bullet.width / 2;
             this.bullets.push(bullet)
         }
-      
+
 
         let elapsed = 0.0;
-        this.instance.ticker.add(({ deltaMS}) => {
-            elapsed+=deltaMS;
-            if(elapsed >=3000) {
+        // 循环
+        this.instance.ticker.add(({ deltaMS }) => {
+            elapsed += deltaMS;
+            if (elapsed >= 300) {
                 elapsed = 0;
-                console.log(this.bullets)
                 createBullets()
-                
+                this.loadObstacle()
             }
+            TWEEN.update()
+            this.checkIsHit()
             this.bullets.forEach((bullet, index) => {
-                bullet.y-=10
-                if(bullet.y< 10) {
-                    console.log('跑出去了')
+                bullet.y -= 10
+                if (bullet.y < 10) {
                     bullet.destroy()
                     this.bullets.splice(index, 1)
                 }
             })
         });
 
-        
+
+    }
+    hitTest(spriteA, spriteB) {
+        const a = spriteA.getBounds();
+        const b = spriteB.getBounds();
+
+        return !(
+            a.right < b.left ||
+            a.left > b.right ||
+            a.bottom < b.top ||
+            a.top > b.bottom
+        );
+    }
+
+    checkIsHit() {
+
+        for (let m = 0; m < this.bullets.length;) {
+            let isHit = false
+            const bullet = this.bullets[m]
+            for (let i = 0; i < this.obstacles.length; i++) {
+                const obstacle = this.obstacles[i];
+                if (this.hitTest(bullet, obstacle)) {
+                    const _obstacle = this.obstacles.splice(i, 1)[0]
+                    const parent = _obstacle.parent;
+                    parent?.children?.[1]?.play()
+                    _obstacle.destroy();
+                    isHit = true
+                }
+            }
+
+            if (isHit) {
+                const _bullet = this.bullets.splice(m, 1)[0]
+                _bullet.destroy()
+            } else {
+                if(this.bullets[m].y < -this.bullets[m].height) {
+                    let _bullet = bullets.splice(i,1)[0];
+                    _bullet.destroy();
+                } else {
+                    m++;
+                }
+             
+            }
+
+        }
+
+
+
+    }
+
+
+    async loadObstacle() {
+        const container = new Container()
+        const obstacle = new Sprite(this.sourceMap.get('obstacle'))
+        obstacle.width = 120;
+        obstacle.height = 120;
+        obstacle.anchor = 0.5;
+        obstacle.x = this.width * Math.random();
+        container.addChild(obstacle)
+        // 加载精灵图集的图像和JSON文件
+        const { textures } = await Assets.load({
+            alias: 'spritesheet',
+            src: '/img/boom.json',
+            data: {
+                ignoreMultiPack: true,
+            }
+        })
+        let fireClip = [
+        ];
+        for (let i = 0; i < Object.keys(textures).length; i++) {
+            fireClip.push(textures['boom' + i + '.png']);
+        }
+        let boom = new AnimatedSprite(fireClip);
+        boom.x = obstacle.x
+        boom.width = obstacle.width * 2.5;
+        boom.height = obstacle.height * 2.5;
+        boom.anchor = 0.5;
+        boom.loop = false;
+        this.obstacles.push(obstacle)
+        container.addChild(boom);
+        this.scene.addChild(container)
+        let tween = new TWEEN.Tween(container)
+            .to(
+                {
+                    x: this.width * Math.random(),
+                    y: this.height + obstacle.height,
+                },
+                obstacleTime // tween持续时间
+            )
+            .easing(TWEEN.Easing.Linear.None)
+            .onComplete(function () {
+                // 到底
+                container.destroy();
+            });
+        tween.start();
+        let tween2 = new TWEEN.Tween(obstacle)
+            .to(
+                {
+                    rotation: -20
+                },
+                obstacleTime // tween持续时间
+            )
+            .easing(TWEEN.Easing.Linear.None)
+        tween2.start();
     }
 
 

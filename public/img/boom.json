@@ -10,7 +10,7 @@
 },
 "boom1.png":
 {
-	"frame": {"x":753,"y":100,"w":84,"h":88},
+	"frame": {"w":84,"h":88},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":218,"y":210,"w":84,"h":88},
@@ -18,7 +18,7 @@
 },
 "boom2.png":
 {
-	"frame": {"x":608,"y":1,"w":143,"h":126},
+	"frame": {"w":143,"h":126},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":188,"y":196,"w":143,"h":126},
@@ -26,7 +26,7 @@
 },
 "boom3.png":
 {
-	"frame": {"x":638,"y":255,"w":74,"h":72},
+	"frame": {"w":74,"h":72},
 	"rotated": false,
 	"trimmed": true,
 	"spriteSourceSize": {"x":220,"y":222,"w":74,"h":72},

@@ -8,6 +8,9 @@ dependencies:
   pixi.js:
     specifier: ^8.0.0
     version: 8.0.0
+  tween.js:
+    specifier: ^16.6.0
+    version: 16.6.0
   vue:
     specifier: ^3.4.19
     version: 3.4.21
@@ -590,6 +593,11 @@ packages:
   /to-fast-properties@2.0.0:
     resolution: {integrity: sha512-/OaKK0xYrs3DmxRYqL/yDc+FxFUVYhDlXMhRmv3z915w2HF1tnN1omB354j8VUGO/hbRzyD6Y3sA7v7GS/ceog==}
     engines: {node: '>=4'}
+
+  /tween.js@16.6.0:
+    resolution: {integrity: sha512-IIhm0VsiBxNJO+WsXUvjcq+u3sKfOwSu67Yh9T5xSpXb2eHHi9+uZDDGBc7uMXjfud0bYiLkYCEb7JXIGXi5KA==}
+    deprecated: This package has moved to @tweenjs/tween.js. Please update your dependencies.
+    dev: false
 
   /vite@5.1.5:
     resolution: {integrity: sha512-BdN1xh0Of/oQafhU+FvopafUp6WaYenLU/NFoL5WyJL++GxkNfieKzBhM24H3HVsPQrlAqB7iJYTHabzaRed5Q==}
